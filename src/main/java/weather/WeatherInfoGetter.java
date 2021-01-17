@@ -14,6 +14,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Scanner;
 import java.util.concurrent.CompletionException;
 
@@ -24,21 +25,17 @@ public class WeatherInfoGetter {
     String key = "79fea1f9005921f7f52b5d323afaf85d";
     @NotBlank
     @Pattern(regexp = "[a-zA-Z]")
-    String city = "bialystok";
+    String city;
     @NotBlank
     @Pattern(regexp = "metric|imperial")
-    String units = "metric";
+    String units;
     URI uri;
-    //LocalDate last_connection_date;
     String last_connection_file = "conn_date.txt";
 
     public WeatherInfoGetter(String city, String units) throws IOException {
         this.city = city;
         this.units = units;
-        //if (date_check()){
         uri = URI.create("http://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + key + "&units=" + units);
-
-        //}
     }
 
     public boolean isConnected() {
@@ -53,25 +50,28 @@ public class WeatherInfoGetter {
         return feels_temp;
     }
 
-    boolean date_check() throws IOException {
+    public boolean date_check() throws IOException {
         String connection_path = System.getProperty("user.dir") + "\\";
         File file = new File(connection_path + last_connection_file);
-        file.createNewFile();
-        if (file.length() > 0) {
-            Scanner scanner = new Scanner(file);
-            LocalDate last_date = LocalDate.parse(scanner.next());
+        if (file.createNewFile()) {
+            if (file.length() > 0) {
+                Scanner scanner = new Scanner(file);
+                LocalDate last_date = LocalDate.parse(scanner.next());
 
-            if (Duration.between(LocalDate.now(), last_date).toDays() > 0) {
+                if (ChronoUnit.DAYS.between(last_date, LocalDate.now()) > 0) {
+                    FileWriter writer = new FileWriter(file);
+                    writer.write(String.valueOf(LocalDate.now()));
+                    writer.close();
+                    return true;
+                } else return false;
+            } else {
                 FileWriter writer = new FileWriter(file);
                 writer.write(String.valueOf(LocalDate.now()));
                 writer.close();
                 return true;
-            } else return false;
-        } else {
-            FileWriter writer = new FileWriter(file);
-            writer.write(String.valueOf(LocalDate.now()));
-            writer.close();
-            return true;
+            }
+        }else {
+            return false;
         }
     }
 
@@ -81,7 +81,6 @@ public class WeatherInfoGetter {
         httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
                 .thenApply(weather.WeatherInfoGetter::parse)
-                //.thenAccept(System.out::println)
                 .join();
     }
 
