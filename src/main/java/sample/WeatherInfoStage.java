@@ -2,6 +2,7 @@ package sample;
 
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -61,6 +62,16 @@ public class WeatherInfoStage extends Stage {
             TextField descText = new TextField(weather_desc);
             descText.setEditable(false);
             gridPane.add(descText,0,2);
+            Button change_settings = new Button("change settings");
+            change_settings.setOnAction(event -> {
+                File file = new File("weather_data.txt");
+                file.delete();
+                file = new File("settings.txt");
+                file.delete();
+                new SettingsStage();
+                this.close();
+            });
+            gridPane.add(change_settings,0,3);
 
             gridPane.setAlignment(Pos.CENTER);
             gridPane.setHgap(10);
