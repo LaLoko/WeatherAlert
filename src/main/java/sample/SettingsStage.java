@@ -29,12 +29,13 @@ public class SettingsStage extends Stage {
     StackPane logoPane = new StackPane();
     GridPane settingsPane = new GridPane();
     TextField city;
-    RadioButton metric,imperial;
+    RadioButton metric, imperial, standard;
     boolean correct_city = false;
 
     Image image = new Image("file:D:\\WeatherAlert\\src\\main\\resources\\logo.jpg");
     Scene scene = new Scene(borderPane, width, height);
-    SettingsStage(){
+
+    SettingsStage() {
         ImageView imageView = new ImageView();
         imageView.setImage(image);
         imageView.setFitWidth(width);
@@ -92,10 +93,14 @@ public class SettingsStage extends Stage {
         imperial.setToggleGroup(unitSelect);
         imperial.setStyle("-fx-text-fill: gold;");
 
-        HBox units = new HBox(metric, imperial);
+        standard = new RadioButton("fahrenheit");
+        standard.setToggleGroup(unitSelect);
+        standard.setStyle("-fx-text-fill: gold;");
+
+        HBox units = new HBox(metric, imperial, standard);
         units.setSpacing(10);
 
-        settingsPane.add(units,0,1);
+        settingsPane.add(units, 0, 1);
 
         Button saveSettings = new Button("save settings");
 
@@ -167,10 +172,12 @@ public class SettingsStage extends Stage {
         FileWriter writer = new FileWriter(settings);
         writer.write(city.getText());
         writer.write('\n');
-        if (metric.isSelected()){
+        if (metric.isSelected()) {
             writer.write("metric");
-        }else {
+        } else if (imperial.isSelected()) {
             writer.write("imperial");
+        } else {
+            writer.write("standard");
         }
         writer.close();
         this.close();
